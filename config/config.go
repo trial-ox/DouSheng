@@ -8,3 +8,6 @@ var OneYear = 365 * 60 * 60 * 24
 
 //jwt密钥
 var Secret = "douyin"
+
+// 每次视频流返回最大数
+var VideoCount = 5
