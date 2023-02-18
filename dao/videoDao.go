@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"DouSheng/config"
+	"github.com/RaymondCode/simple-demo/config"
 	"time"
 )
 
