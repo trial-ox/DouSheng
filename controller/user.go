@@ -79,7 +79,7 @@ func Login(c *gin.Context) {
 	userService := service.UserServiceImpl{}
 	user := userService.GetUserByName(username)
 
-	if password == user.Password {
+	if service.GetSha256(password) == user.Password {
 		token := service.NewToken(username)
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0, StatusMsg: "登录成功"},
