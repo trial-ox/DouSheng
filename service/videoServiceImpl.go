@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/RaymondCode/simple-demo/config"
-	"github.com/RaymondCode/simple-demo/controller/common"
+
 	"github.com/RaymondCode/simple-demo/dao"
 	// "github.com/satori/go.uuid"
 	"log"
@@ -18,16 +18,30 @@ type VideoServiceImpl struct {
 // Feed
 // 通过传入时间戳，当前用户的id，返回对应的视频数组，以及视频数组中最早的发布时间
 // 获取视频数组大小是可以控制的，在config中的videoCount变量
-func (videoService VideoServiceImpl) Feed(lastTime time.Time, userId int64) ([]common.Video, time.Time, error) {
+func (videoService VideoServiceImpl) Feed(lastTime time.Time, userId int64) ([]Video, time.Time, error) {
 	//创建对应返回视频的切片数组，提前将切片的容量设置好，可以减少切片扩容的性能
-	videos := make([]common.Video, 0, config.VideoCount)
+	videos := make([]Video, 1, config.VideoCount)
 	//根据传入的时间，获得传入时间前n个视频，可以通过config.videoCount来控制
 	tableVideos, err := dao.GetVideosByLastTime(lastTime)
 	if err != nil {
 		log.Printf("方法dao.GetVideosByLastTime(lastTime) 失败：%v", err)
 		return nil, time.Time{}, err
 	}
+	log.Printf("test====== %v", tableVideos[0])
 	log.Printf("方法dao.GetVideosByLastTime(lastTime) 成功：%v", tableVideos)
+	videos[0] = Video{
+		tablevideo: tableVideos[0],
+		Author: User{
+			Id:            1,
+			Name:          "zpd",
+			FollowCount:   0,
+			FollowerCount: 0,
+			IsFollow:      false},
+		FavoriteCount: 0,
+		CommentCount:  0,
+		IsFavorite:    false,
+	}
+	log.Printf("test=====%v", videos)
 	//将数据通过copyVideos进行处理，在拷贝的过程中对数据进行组装
 	// err = videoService.copyVideos(&videos, &tableVideos, userId)
 	// if err != nil {

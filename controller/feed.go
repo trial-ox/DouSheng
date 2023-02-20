@@ -11,8 +11,8 @@ import (
 
 type FeedResponse struct {
 	Response
-	VideoList []Video `json:"video_list,omitempty"`
-	NextTime  int64   `json:"next_time,omitempty"`
+	VideoList []service.Video `json:"video_list,omitempty"`
+	NextTime  int64           `json:"next_time,omitempty"`
 }
 
 // Feed same demo video list for every request
@@ -20,7 +20,7 @@ func Feed(c *gin.Context) {
 	inputTime := c.Query("latest_time")
 	log.Printf("传入的时间" + inputTime)
 	var lastTime time.Time
-	if inputTime != "0" {
+	if inputTime != "" {
 		me, _ := strconv.ParseInt(inputTime, 10, 64)
 		lastTime = time.Unix(me, 0)
 	} else {
@@ -39,7 +39,9 @@ func Feed(c *gin.Context) {
 		})
 		return
 	}
+	log.Printf("test======== %v", feed)
 	log.Printf("方法videoService.Feed(lastTime, userId) 成功")
+	log.Printf("final test %v")
 	c.JSON(http.StatusOK, FeedResponse{
 		Response:  Response{StatusCode: 0},
 		VideoList: feed,

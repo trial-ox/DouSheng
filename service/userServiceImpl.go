@@ -59,7 +59,7 @@ func (usi *UserServiceImpl) GetUserById(id int64) (User, error) {
 	return user, nil
 }
 
-//加密密码
+// 加密密码
 func GetSha256(str string) string {
 	srcByte := []byte(str)
 	sha256New := sha256.New()
@@ -68,7 +68,7 @@ func GetSha256(str string) string {
 	return sha256String
 }
 
-//根据用户信息生成token
+// 根据用户信息生成token
 func NewToken(username string) string {
 	userServiceImpl := new(UserServiceImpl)
 	u := userServiceImpl.GetUserByName(username)

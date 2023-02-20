@@ -1,8 +1,6 @@
 package controller
 
-import (
-	"github.com/RaymondCode/simple-demo/dao"
-)
+import ()
 
 type Response struct {
 	StatusCode int32  `json:"status_code"`
@@ -19,13 +17,13 @@ type Response struct {
 // 	IsFavorite    bool   `json:"is_favorite,omitempty"`
 // }
 
-type Video struct {
-	dao.TableVideo
-	Author        User  `json:"author"`
-	FavoriteCount int64 `json:"favorite_count"`
-	CommentCount  int64 `json:"comment_count"`
-	IsFavorite    bool  `json:"is_favorite"`
-}
+// type Video struct {
+// 	dao.TableVideo
+// 	Author        User  `json:"author"`
+// 	FavoriteCount int64 `json:"favorite_count"`
+// 	CommentCount  int64 `json:"comment_count"`
+// 	IsFavorite    bool  `json:"is_favorite"`
+// }
 
 type Comment struct {
 	Id         int64  `json:"id,omitempty"`
