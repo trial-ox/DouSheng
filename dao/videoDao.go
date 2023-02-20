@@ -14,6 +14,10 @@ type TableVideo struct {
 	Title       string `json:"title"` //视频名，5.23添加
 }
 
+func (TableVideo) TableName() string {
+	return "videos"
+}
+
 // GetVideosByAuthorId
 // 根据作者的id来查询对应数据库数据，并TableVideo返回切片
 func GetVideosByAuthorId(authorId int64) ([]TableVideo, error) {
@@ -104,15 +108,15 @@ func GetVideosByLastTime(lastTime time.Time) ([]TableVideo, error) {
 // 	return nil
 // }
 
-// // GetVideoIdsByAuthorId
-// // 通过作者id来查询发布的视频id切片集合
-// func GetVideoIdsByAuthorId(authorId int64) ([]int64, error) {
-// 	var id []int64
-// 	//通过pluck来获得单独的切片
-// 	result := Db.Model(&TableVideo{}).Where("author_id", authorId).Pluck("id", &id)
-// 	//如果出现问题，返回对应到空，并且返回error
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
-// 	return id, nil
-// }
+// GetVideoIdsByAuthorId
+// 通过作者id来查询发布的视频id切片集合
+func GetVideoIdsByAuthorId(authorId int64) ([]int64, error) {
+	var id []int64
+	//通过pluck来获得单独的切片
+	result := Db.Model(&TableVideo{}).Where("author_id", authorId).Pluck("id", &id)
+	//如果出现问题，返回对应到空，并且返回error
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return id, nil
+}

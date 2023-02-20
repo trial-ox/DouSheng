@@ -14,6 +14,9 @@ type Video struct {
 	IsFavorite    bool  `json:"is_favorite"`
 }
 
+type VideoList struct {
+}
+
 type VideoService interface {
 	// Feed
 	// 通过传入时间戳，当前用户的id，返回对应的视频切片数组，以及视频数组中最早的发布时间
