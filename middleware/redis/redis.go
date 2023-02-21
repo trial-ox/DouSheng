@@ -18,7 +18,7 @@ func InitRedis() {
 
 	RdbLikeVideoId = redis.NewClient(&redis.Options{
 		Addr: "192.168.200.130",
-		DB:   0,
+		DB:   1,
 	})
 
 }
