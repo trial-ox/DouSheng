@@ -14,6 +14,10 @@ type TableVideo struct {
 	Title       string `json:"title"` //视频名，5.23添加
 }
 
+func (TableVideo) TableName() string {
+	return "videos"
+}
+
 // GetVideosByAuthorId
 // 根据作者的id来查询对应数据库数据，并TableVideo返回切片
 func GetVideosByAuthorId(authorId int64) ([]TableVideo, error) {
