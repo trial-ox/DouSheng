@@ -8,3 +8,16 @@ var OneYear = 365 * 60 * 60 * 24
 
 //jwt密钥
 var Secret = "douyin"
+
+// 每次视频流返回最大数
+var VideoCount = 5
+
+//评论操作状态：有效
+const ValidComment = 0
+
+//评论操作状态：取消
+const InvalidComment = 1
+
+const IsLike = 0     //点赞的状态
+const Unlike = 1     //取消赞的状态
+const LikeAction = 1 //点赞的行为
