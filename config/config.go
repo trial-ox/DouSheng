@@ -17,3 +17,6 @@ const ValidComment = 0
 
 //评论操作状态：取消
 const InvalidComment = 1
+
+//格式化时间
+const DateTime = "2023-02-21 15:04:05"
