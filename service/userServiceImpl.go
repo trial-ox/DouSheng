@@ -4,16 +4,18 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/RaymondCode/simple-demo/config"
-	"github.com/RaymondCode/simple-demo/dao"
-	"github.com/dgrijalva/jwt-go"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/RaymondCode/simple-demo/config"
+	"github.com/RaymondCode/simple-demo/dao"
+	"github.com/dgrijalva/jwt-go"
 )
 
 type UserServiceImpl struct {
 	FavoriteService
+	FollowService
 }
 
 func (usi *UserServiceImpl) GetUserList() []dao.TableUser {
