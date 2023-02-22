@@ -6,9 +6,10 @@ replace github.com/coreos/go-systemd => github.com/coreos/go-systemd/v22 v22.1.0
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gavv/httpexpect/v2 v2.12.0
-	github.com/gin-gonic/gin v1.8.2
-	github.com/stretchr/testify v1.8.1
+	github.com/gavv/httpexpect/v2 v2.8.0
+	github.com/gin-gonic/gin v1.7.7
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/stretchr/testify v1.7.0
 	gorm.io/driver/mysql v1.4.6
 	gorm.io/gorm v1.24.5
 )
@@ -16,7 +17,9 @@ require (
 require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect

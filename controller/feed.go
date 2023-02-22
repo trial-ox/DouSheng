@@ -49,21 +49,21 @@ func Feed(c *gin.Context) {
 	})
 }
 
-// // GetVideo 拼装videoService
-// func GetVideo() service.VideoServiceImpl {
-// 	var userService service.UserServiceImpl
-// 	var videoService service.VideoServiceImpl
-// 	// videoService.UserService = &userService
-// 	// var followService service.FollowServiceImp
+// GetVideo 拼装videoService
+func GetVideo() service.VideoServiceImpl {
+	var userService service.UserServiceImpl
+	var videoService service.VideoServiceImpl
+	videoService.UserService = &userService
+	// var followService service.FollowServiceImp
 
-// 	// var likeService service.LikeServiceImpl
-// 	// var commentService service.CommentServiceImpl
-// 	// userService.FollowService = &followService
-// 	// userService.LikeService = &likeService
-// 	// followService.UserService = &userService
-// 	// likeService.VideoService = &videoService
-// 	// commentService.UserService = &userService
-// 	// videoService.CommentService = &commentService
-// 	// videoService.LikeService = &likeService
-// 	return videoService
-// }
+	var favoriteService service.FavoriteServiceImpl
+	// var commentService service.CommentServiceImpl
+	// userService.FollowService = &followService
+	userService.FavoriteService = &favoriteService
+	// followService.UserService = &userService
+	favoriteService.VideoService = &videoService
+	// commentService.UserService = &userService
+	// videoService.CommentService = &commentService
+	videoService.FavoriteService = &favoriteService
+	return videoService
+}

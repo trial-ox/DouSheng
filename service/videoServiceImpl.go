@@ -2,6 +2,8 @@ package service
 
 import (
 	"github.com/RaymondCode/simple-demo/config"
+	"mime/multipart"
+
 	"sync"
 
 	"github.com/RaymondCode/simple-demo/dao"
@@ -13,7 +15,11 @@ import (
 )
 
 type VideoServiceImpl struct {
-	UserServiceImpl
+
+	UserService
+	FavoriteService
+
+
 }
 
 // Feed
@@ -184,7 +190,8 @@ func (videoService *VideoServiceImpl) creatVideo(video *Video, data *dao.TableVi
 	//插入Author，这里需要将视频的发布者和当前登录的用户传入，才能正确获得isFollow，
 	//如果出现错误，不能直接返回失败，将默认值返回，保证稳定
 	go func() {
-		video.Author, err = videoService.UserServiceImpl.GetUserByIdWithCurId(data.AuthorId, userId)
+		video.Author, err = videoService.UserService.GetUserByIdWithCurId(data.AuthorId, userId)
+		video.Author, err = videoService.UserService.GetUserByIdWithCurId(data.AuthorId, userId)
 		if err != nil {
 			log.Printf("方法videoService.GetUserByIdWithCurId(data.AuthorId, userId) 失败：%v", err)
 		} else {
@@ -227,4 +234,20 @@ func (videoService *VideoServiceImpl) creatVideo(video *Video, data *dao.TableVi
 	//}()
 
 	wg.Wait()
+}
+
+func (videoService VideoServiceImpl) GetVideo(videoId int64, userId int64) (Video, error) {
+
+	//TODO implement me
+	panic("implement me")
+}
+
+func (videoService VideoServiceImpl) Publish(data *multipart.FileHeader, userId int64, title string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (videoService VideoServiceImpl) GetVideoIdList(userId int64) ([]int64, error) {
+	//TODO implement me
+	panic("implement me")
 }

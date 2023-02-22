@@ -98,7 +98,9 @@ func UserInfo(c *gin.Context) {
 
 	userid, _ := strconv.ParseInt(c.Query("user_id"), 10, 64)
 
-	userService := service.UserServiceImpl{}
+	userService := service.UserServiceImpl{
+		FavoriteService: &service.FavoriteServiceImpl{},
+	}
 
 	if user, err := userService.GetUserById(userid); err != nil {
 		c.JSON(http.StatusOK, UserResponse{
