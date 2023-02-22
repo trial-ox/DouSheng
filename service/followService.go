@@ -10,6 +10,11 @@ type FollowService interface {
 	// 根据用户id来查询用户关注了多少其它用户
 	GetFollowingCnt(userId int64) (int64, error)
 
+	// 当前用户关注目标用户
+	AddFollowRelation(userId int64, targetId int64) (bool, error)
+	// 当前用户取消对目标用户的关注
+	DeleteFollowRelation(userId int64, targetId int64) (bool, error)
+
 	//  获取当前用户的关注列表
 	GetFollowing(userId int64) ([]User, error)
 	//  获取当前用户的粉丝列表
