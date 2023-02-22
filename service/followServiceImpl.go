@@ -99,6 +99,32 @@ func (f *FollowServiceImp) getFollowing(userId int64) ([]User, error) {
 	return users, nil
 }
 
+// GetFollowing 根据当前用户id来查询他的关注者列表。
+func (f *FollowServiceImp) GetFollowing(userId int64) ([]User, error) {
+	return getFollowing(userId)
+}
+
+// 从数据库查所有关注用户信息。
+func getFollowing(userId int64) ([]User, error) {
+	users := make([]User, 1)
+	// 查询出错。
+	if err := dao.Db.Raw("select id,`name`,"+
+		"\ncount(if(tag = 'follower' and cancel is not null,1,null)) follower_count,"+
+		"\ncount(if(tag = 'follow' and cancel is not null,1,null)) follow_count,"+
+		"\n 'true' is_follow\nfrom\n("+
+		"\nselect f1.follower_id fid,u.id,`name`,f2.cancel,'follower' tag"+
+		"\nfrom follows f1 join users u on f1.user_id = u.id and f1.cancel = 0"+
+		"\nleft join follows f2 on u.id = f2.user_id and f2.cancel = 0\n\tunion all"+
+		"\nselect f1.follower_id fid,u.id,`name`,f2.cancel,'follow' tag"+
+		"\nfrom follows f1 join users u on f1.user_id = u.id and f1.cancel = 0"+
+		"\nleft join follows f2 on u.id = f2.follower_id and f2.cancel = 0\n) T"+
+		"\nwhere fid = ? group by fid,id,`name`", userId).Scan(&users).Error; nil != err {
+		return nil, err
+	}
+	// 返回关注对象列表。
+	return users, nil
+}
+
 //根据当前用户id来查询他的粉丝列表。
 func (f *FollowServiceImp) GetFollowers(userId int64) ([]User, error) {
 	return getFollowers(userId)
@@ -129,4 +155,54 @@ func getFollowers(userId int64) ([]User, error) {
 	}
 	// 查询成功。
 	return users, nil
+}
+
+// 给定当前用户和目标对象id，添加他们之间的关注关系。
+func (*FollowServiceImp) AddFollowRelation(userId int64, targetId int64) (bool, error) {
+	followDao := dao.NewFollowDaoInstance()
+	follow, err := followDao.FindEverFollowing(targetId, userId)
+	// 寻找SQL 出错。
+	if nil != err {
+		return false, err
+	}
+	// 曾经关注过，只需要update一下cancel即可。
+	if nil != follow {
+		_, err := followDao.UpdateFollowRelation(targetId, userId, 0)
+		// update 出错。
+		if nil != err {
+			return false, err
+		}
+		// update 成功。
+		return true, nil
+	}
+	// 曾经没有关注过，需要插入一条关注关系。
+	_, err = followDao.InsertFollowRelation(targetId, userId)
+	if nil != err {
+		// insert 出错
+		return false, err
+	}
+	// 加入数据库 成功。
+	return true, nil
+}
+
+// 给定当前用户和目标用户id，删除其关注关系。
+func (*FollowServiceImp) DeleteFollowRelation(userId int64, targetId int64) (bool, error) {
+	followDao := dao.NewFollowDaoInstance()
+	follow, err := followDao.FindEverFollowing(targetId, userId)
+	// 寻找 SQL 出错。
+	if nil != err {
+		return false, err
+	}
+	// 曾经关注过，只需要update一下cancel即可。
+	if nil != follow {
+		_, err := followDao.UpdateFollowRelation(targetId, userId, 1)
+		// update 出错。
+		if nil != err {
+			return false, err
+		}
+		// update 成功。
+		return true, nil
+	}
+	// 没有关注关系
+	return false, nil
 }
