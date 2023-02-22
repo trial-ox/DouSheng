@@ -41,7 +41,27 @@ func (usi *UserServiceImpl) InsertUser(user *dao.TableUser) bool {
 	return success
 }
 
-//加密密码
+func (usi *UserServiceImpl) GetUserById(id int64) (User, error) {
+	user := User{
+		Id:            0,
+		Name:          "",
+		FollowCount:   0,
+		FollowerCount: 0,
+		IsFollow:      false,
+	}
+	tableUser, err := dao.GetTableUserById(id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+		return user, err
+	}
+
+	user.Id = tableUser.Id
+	user.Name = tableUser.Name
+	return user, nil
+}
+
+// 加密密码
+
 func GetSha256(str string) string {
 	srcByte := []byte(str)
 	sha256New := sha256.New()
@@ -50,7 +70,7 @@ func GetSha256(str string) string {
 	return sha256String
 }
 
-//根据用户信息生成token
+// 根据用户信息生成token
 func NewToken(username string) string {
 	userServiceImpl := new(UserServiceImpl)
 	u := userServiceImpl.GetUserByName(username)
@@ -161,6 +181,52 @@ func (usi *UserServiceImpl) GetUserByIdWithCurId(id int64, curId int64) (User, e
 		//IsFollow:      isfollow,
 		TotalFavorited: totalFavorited,
 		FavoriteCount:  favoritedCount,
+	}
+	return user, nil
+}
+
+// GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
+func (usi *UserServiceImpl) GetUserByIdWithCurId(id int64, curId int64) (User, error) {
+	user := User{
+		Id:            0,
+		Name:          "",
+		FollowCount:   0,
+		FollowerCount: 0,
+		IsFollow:      false,
+		//TotalFavorited: 0,
+		//FavoriteCount:  0,
+	}
+	tableUser, err := dao.GetTableUserById(id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+		log.Println("User Not Found")
+		return user, err
+	}
+	log.Println("Query User Success")
+
+	//followCount, err := usi.GetFollowingCnt(id)
+	//if err != nil {
+	//	log.Println("Err:", err.Error())
+	//}
+	//followerCount, err := usi.GetFollowerCnt(id)
+	//if err != nil {
+	//	log.Println("Err:", err.Error())
+	//}
+	//isfollow, err := usi.IsFollowing(curId, id)
+	//if err != nil {
+	//	log.Println("Err:", err.Error())
+	//}
+	//u := GetLikeService() //解决循环依赖
+	//totalFavorited, _ := u.TotalFavourite(id)
+	//favoritedCount, _ := u.FavouriteVideoCount(id)
+	user = User{
+		Id:   id,
+		Name: tableUser.Name,
+		//FollowCount:   followCount,
+		//FollowerCount: followerCount,
+		//IsFollow:      isfollow,
+		//TotalFavorited: totalFavorited,
+		//FavoriteCount:  favoritedCount,
 	}
 	return user, nil
 }
