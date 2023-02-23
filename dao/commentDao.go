@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/RaymondCode/simple-demo/config"
@@ -20,6 +21,29 @@ type Comment struct {
 // 完成数据库表名称的映射
 func (Comment) TableName() string {
 	return "comments"
+}
+
+//获取评论数量
+func Count(videoId int64) (int64, error) {
+	//Init()
+	var count int64
+	//数据库中查询评论数量
+	err := Db.Model(Comment{}).Where(map[string]interface{}{"video_id": videoId, "cancel": config.ValidComment}).Count(&count).Error
+	if err != nil {
+		return -1, errors.New("find comments count failed")
+	}
+	return count, nil
+}
+
+//CommentIdList 根据视频id获取评论id 列表
+func CommentIdList(videoId int64) ([]string, error) {
+	var commentIdList []string
+	err := Db.Model(Comment{}).Select("id").Where("video_id = ?", videoId).Find(&commentIdList).Error
+	if err != nil {
+		log.Println("CommentIdList:", err)
+		return nil, err
+	}
+	return commentIdList, nil
 }
 
 // send 发表评论
