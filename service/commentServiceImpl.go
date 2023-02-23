@@ -3,15 +3,75 @@ package service
 import (
 	"log"
 	"sort"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/RaymondCode/simple-demo/config"
 	"github.com/RaymondCode/simple-demo/dao"
+	"github.com/RaymondCode/simple-demo/middleware/redis"
 )
 
 //引入userservice
 type CommentServiceImpl struct {
 	UserService
+}
+
+//使用video id 查询Comment数量
+func (c CommentServiceImpl) CountFromVideoId(videoId int64) (int64, error) {
+	//先在缓存中查视频id
+	cnt, err := redis.RdbVCid.SCard(redis.Ctx, strconv.FormatInt(videoId, 10)).Result()
+	if err != nil { //若查询缓存出错，则打印log
+		//return 0, err
+		log.Println("count from redis error:", err)
+	}
+	//缓存中查到了数量，则返回数量值-1（去除0值）
+	if cnt != 0 {
+		return cnt - 1, nil
+	}
+	//缓存中查不到则去请求数据库
+	cntDao, err1 := dao.Count(videoId)
+	if err1 != nil {
+		log.Println("comment count dao err:", err1)
+		return 0, nil
+	}
+	//将评论id切片存入redis
+	go func() {
+		//查询评论id-list
+		cList, _ := dao.CommentIdList(videoId)
+		//先在redis中存储一个值,防止脏读
+		_, _err := redis.RdbVCid.SAdd(redis.Ctx, strconv.Itoa(int(videoId)), config.DefaultRedisValue).Result()
+		if _err != nil { //若存储redis失败
+			return
+		}
+		//设置key值过期时间
+		_, err := redis.RdbVCid.Expire(redis.Ctx, strconv.Itoa(int(videoId)),
+			time.Duration(config.OneMonth)*time.Second).Result()
+		if err != nil {
+			log.Println("redis save one vId - cId expire failed")
+		}
+		//评论id循环存入redis
+		for _, commentId := range cList {
+			insertRedisVideoCommentId(strconv.Itoa(int(videoId)), commentId)
+		}
+	}()
+	//返回结果
+	return cntDao, nil
+}
+
+//在redis中存储video_id对应的comment_id
+func insertRedisVideoCommentId(videoId string, commentId string) {
+	//在redis-RdbVCid中存储video_id对应的comment_id
+	_, err := redis.RdbVCid.SAdd(redis.Ctx, videoId, commentId).Result()
+	if err != nil { //若存储redis失败-1 err，则直接删除key
+		redis.RdbVCid.Del(redis.Ctx, videoId)
+		return
+	}
+	//在redis-RdbCVid中存储comment_id对应的video_id
+	_, err = redis.RdbCVid.Set(redis.Ctx, commentId, videoId, 0).Result()
+	if err != nil {
+		log.Println("redis save one cId - vId failed")
+	}
 }
 
 // 发表评论接口实现
