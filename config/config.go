@@ -10,7 +10,7 @@ var OneYear = 365 * 60 * 60 * 24
 var Secret = "douyin"
 
 // 每次视频流返回最大数
-var VideoCount = 5
+var VideoCount = 2
 
 //评论操作状态：有效
 const ValidComment = 0

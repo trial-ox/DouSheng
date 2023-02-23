@@ -7,7 +7,7 @@ import (
 )
 
 type Video struct {
-	tablevideo    dao.TableVideo
+	dao.TableVideo
 	Author        User  `json:"author"`
 	FavoriteCount int64 `json:"favorite_count"`
 	CommentCount  int64 `json:"comment_count"`
