@@ -24,3 +24,5 @@ const LikeAction = 1 //点赞的行为
 
 //格式化时间
 const DateTime = "2023-02-21 15:04:05"
+
+const DefaultRedisValue = -1 //redis中key对应的预设值，防脏读
