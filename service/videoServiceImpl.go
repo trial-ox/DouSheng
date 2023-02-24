@@ -17,6 +17,7 @@ import (
 type VideoServiceImpl struct {
 	UserService
 	FavoriteService
+	CommentService
 }
 
 // Feed
@@ -32,18 +33,6 @@ func (videoService VideoServiceImpl) Feed(lastTime time.Time, userId int64) ([]V
 		return nil, time.Time{}, err
 	}
 	log.Printf("方法dao.GetVideosByLastTime(lastTime) 成功：%v", tableVideos)
-	// videos[0] = Video{
-	// 	tablevideo: tableVideos[0],
-	// 	Author: User{
-	// 		Id:            1,
-	// 		Name:          "zpd",
-	// 		FollowCount:   0,
-	// 		FollowerCount: 0,
-	// 		IsFollow:      false},
-	// 	FavoriteCount: 0,
-	// 	CommentCount:  0,
-	// 	IsFavorite:    false,
-	// }
 	// 将数据通过copyVideos进行处理，在拷贝的过程中对数据进行组装
 	err = videoService.copyVideos(&videos, &tableVideos, userId)
 	if err != nil {
@@ -101,20 +90,10 @@ func (videoService *VideoServiceImpl) creatVideo(video *Video, data *dao.TableVi
 	var err error
 
 	video.TableVideo = *data
-	// video.Author = User{
-	// 	Id:             2,
-	// 	Name:           "lrh",
-	// 	FollowCount:    1,
-	// 	FollowerCount:  1,
-	// 	IsFollow:       false,
-	// 	TotalFavorited: 10,
-	// 	FavoriteCount:  3,
-	// }
-
 	// 插入Author，这里需要将视频的发布者和当前登录的用户传入，才能正确获得isFollow，
 	// 如果出现错误，不能直接返回失败，将默认值返回，保证稳定
 	go func() {
-		video.Author, err = videoService.GetUserByIdWithCurId((*data).AuthorId, userId)
+		video.Author, err = videoService.GetUserByIdWithCurId(data.AuthorId, userId)
 		if err != nil {
 			log.Printf("方法videoService.GetUserByIdWithCurId(data.AuthorId, userId) 失败：%v", err)
 		} else {
@@ -161,8 +140,21 @@ func (videoService *VideoServiceImpl) creatVideo(video *Video, data *dao.TableVi
 
 func (videoService VideoServiceImpl) GetVideo(videoId int64, userId int64) (Video, error) {
 
-	//TODO implement me
-	panic("implement me")
+	//初始化video对象
+	var video Video
+
+	//从数据库中查询数据，如果查询不到数据，就直接失败返回，后续流程就不需要执行了
+	data, err := dao.GetVideoByVideoId(videoId)
+	if err != nil {
+		log.Printf("方法dao.GetVideoByVideoId(videoId) 失败：%v", err)
+		return video, err
+	} else {
+		log.Printf("方法dao.GetVideoByVideoId(videoId) 成功")
+	}
+
+	//插入从数据库中查到的数据
+	videoService.creatVideo(&video, &data, userId)
+	return video, nil
 }
 
 func (videoService VideoServiceImpl) Publish(data *multipart.FileHeader, userId int64, title string) error {

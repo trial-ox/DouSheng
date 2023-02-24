@@ -54,16 +54,15 @@ func GetVideo() service.VideoServiceImpl {
 	var userService service.UserServiceImpl
 	var videoService service.VideoServiceImpl
 	videoService.UserService = &userService
-	// var followService service.FollowServiceImp
-
+	var followService service.FollowServiceImp
 	var favoriteService service.FavoriteServiceImpl
-	// var commentService service.CommentServiceImpl
-	// userService.FollowService = &followService
+	var commentService service.CommentServiceImpl
+	userService.FollowService = &followService
 	userService.FavoriteService = &favoriteService
-	// followService.UserService = &userService
+	followService.UserService = &userService
 	favoriteService.VideoService = &videoService
-	// commentService.UserService = &userService
-	// videoService.CommentService = &commentService
+	commentService.UserService = &userService
+	videoService.CommentService = &commentService
 	videoService.FavoriteService = &favoriteService
 	return videoService
 }
