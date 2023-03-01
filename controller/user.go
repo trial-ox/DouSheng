@@ -76,7 +76,7 @@ func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
-	userService := service.UserServiceImpl{}
+	userService := GetVideo()
 	user := userService.GetUserByName(username)
 
 	if service.GetSha256(password) == user.Password {
@@ -98,9 +98,7 @@ func UserInfo(c *gin.Context) {
 
 	userid, _ := strconv.ParseInt(c.Query("user_id"), 10, 64)
 
-	userService := service.UserServiceImpl{
-		FavoriteService: &service.FavoriteServiceImpl{},
-	}
+	userService := GetVideo()
 
 	if user, err := userService.GetUserById(userid); err != nil {
 		c.JSON(http.StatusOK, UserResponse{

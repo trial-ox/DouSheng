@@ -48,7 +48,7 @@ func (favorite *FavoriteServiceImpl) IsFavourite(videoId int64, userId int64) (b
 			return exist, nil
 		} else {
 			//都没有，创建set，添加一个默认值,维持set不为空，避免缓存击穿
-			if err := NewRedisSet(strUserId); err != nil {
+			if err := NewRedisUserSet(strUserId); err != nil {
 				return false, err
 			}
 			//LikeUserId LikeVideoId中都没有对应key,通过userId查询likes表,返回所有点赞videoId，并维护到Redis LikeUserId
@@ -90,7 +90,7 @@ func (favorite *FavoriteServiceImpl) FavouriteCount(videoId int64) (int64, error
 		return count - 1, nil //去掉初始化的默认元素
 	} else {
 		//redis中没有videoId的set，设置初始化，逻辑同上方法
-		if err := NewRedisSet(strVideoId); err != nil {
+		if err := NewRedisVideoSet(strVideoId); err != nil {
 			return 0, err
 		}
 		//通过videoId查表，返回信息并维护到redis中
@@ -161,7 +161,7 @@ func (favorite *FavoriteServiceImpl) FavouriteAction(userId int64, videoId int64
 		}
 		//若redis中不存在，维护redis，新建key:strUserId
 
-		if err := NewRedisSet(strUserId); err != nil {
+		if err := NewRedisUserSet(strUserId); err != nil {
 			return err
 		}
 		//查询数据库，添加到redis中
@@ -223,7 +223,7 @@ func (favorite *FavoriteServiceImpl) FavouriteAction(userId int64, videoId int64
 			}
 		} else {
 			//不存在 strVideoId，新建，逻辑同上
-			if err := NewRedisSet(strVideoId); err != nil {
+			if err := NewRedisVideoSet(strVideoId); err != nil {
 				return err
 			}
 			userIdList, err1 := dao.GetLikeUserIdList(videoId)
@@ -280,7 +280,7 @@ func (favorite *FavoriteServiceImpl) FavouriteAction(userId int64, videoId int64
 			}
 		} else {
 			//redis不存在key：userId，则新建，逻辑同上
-			if err := NewRedisSet(strUserId); err != nil {
+			if err := NewRedisUserSet(strUserId); err != nil {
 				return err
 			}
 			videoIdList, err1 := dao.GetLikeVideoIdList(userId)
@@ -334,7 +334,7 @@ func (favorite *FavoriteServiceImpl) FavouriteAction(userId int64, videoId int64
 				return err1
 			}
 		} else { //redis不存在key：videoId，则新建，逻辑同上
-			if err := NewRedisSet(strVideoId); err != nil {
+			if err := NewRedisVideoSet(strVideoId); err != nil {
 				return err
 			}
 			//if _, err := redis.RdbLikeVideoId.SAdd(redis.Ctx, strVideoId, -1).Result(); err != nil {
@@ -410,7 +410,7 @@ func (favorite *FavoriteServiceImpl) GetFavouriteList(userId int64, curId int64)
 	} else {
 		//redis中没有userId的key，则查询数据库
 		//新建set key：userId
-		if err := NewRedisSet(strUserId); err != nil {
+		if err := NewRedisUserSet(strUserId); err != nil {
 			return nil, err
 		}
 		videoIdList, err1 := dao.GetLikeVideoIdList(userId)
@@ -491,7 +491,7 @@ func (favorite *FavoriteServiceImpl) FavouriteVideoCount(userId int64) (int64, e
 
 		}
 	} else {
-		if err := NewRedisSet(strUserId); err != nil {
+		if err := NewRedisUserSet(strUserId); err != nil {
 			return 0, err
 		}
 		videoIdList, err1 := dao.GetLikeVideoIdList(userId)
@@ -517,8 +517,26 @@ func (favorite *FavoriteServiceImpl) FavouriteVideoCount(userId int64) (int64, e
 }
 
 // NewRedisSet NewRedisSet 在查询redis中的set时若不存在该key，则新建并设默认值防止缓存击穿
-func NewRedisSet(strId string) error {
+func NewRedisVideoSet(strId string) error {
 	if _, err := redis.RdbLikeVideoId.SAdd(redis.Ctx, strId, -1).Result(); err != nil {
+		log.Printf("方法:FavouriteAction RedisLikeVideoId add value失败")
+		redis.RdbLikeVideoId.Del(redis.Ctx, strId)
+		return err
+	}
+	//给键值设置有效期
+	_, err := redis.RdbLikeVideoId.Expire(redis.Ctx, strId,
+		time.Duration(config.OneMonth)*time.Second).Result()
+	if err != nil {
+		log.Printf("方法:FavouriteAction RedisLikeVideoId 设置有效期失败")
+		redis.RdbLikeVideoId.Del(redis.Ctx, strId)
+		return err
+	}
+	return nil
+}
+
+// NewRedisSet NewRedisSet 在查询redis中的set时若不存在该key，则新建并设默认值防止缓存击穿
+func NewRedisUserSet(strId string) error {
+	if _, err := redis.RdbLikeUserId.SAdd(redis.Ctx, strId, -1).Result(); err != nil {
 		log.Printf("方法:FavouriteAction RedisLikeVideoId add value失败")
 		redis.RdbLikeVideoId.Del(redis.Ctx, strId)
 		return err

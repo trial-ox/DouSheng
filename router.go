@@ -27,9 +27,9 @@ func initRouter(r *gin.Engine) {
 	apiRouter.GET("/comment/list/", jwt.AuthWithoutLogin(), controller.CommentList)
 
 	// extra apis - II
-	apiRouter.POST("/relation/action/", jwt.Auth(), controller.RelationAction)
-	apiRouter.GET("/relation/follow/list/", jwt.Auth(), controller.FollowList)
-	apiRouter.GET("/relation/follower/list/", jwt.Auth(), controller.FollowerList)
+	apiRouter.POST("/relation/action/", jwt.Auth(), controller.RelationActionFuction)
+	apiRouter.GET("/relation/follow/list/", jwt.Auth(), controller.GetFollowing)
+	apiRouter.GET("/relation/follower/list/", jwt.Auth(), controller.GetFollowers)
 	apiRouter.GET("/relation/friend/list/", jwt.Auth(), controller.FriendList)
 	apiRouter.GET("/message/chat/", jwt.Auth(), controller.MessageChat)
 	apiRouter.POST("/message/action/", jwt.Auth(), controller.MessageAction)
