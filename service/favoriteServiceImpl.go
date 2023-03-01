@@ -429,7 +429,7 @@ func (favorite *FavoriteServiceImpl) GetFavouriteList(userId int64, curId int64)
 		}
 		//采用协程并发添加video到集合中去
 		favoriteVideoList := new([]Video)
-		length := len(videoIdList) - 1 //减去默认设置的-1
+		length := len(videoIdList) //减去默认设置的-1
 		if length == 0 {
 			return *favoriteVideoList, nil
 		}

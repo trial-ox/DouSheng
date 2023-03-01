@@ -2,12 +2,15 @@ package controller
 
 import (
 	"fmt"
+	"github.com/RaymondCode/simple-demo/dao"
 	"github.com/RaymondCode/simple-demo/service"
+	"github.com/RaymondCode/simple-demo/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strconv"
+	"time"
 )
 
 type VideoListResponse struct {
@@ -17,14 +20,12 @@ type VideoListResponse struct {
 
 // Publish check token then save upload file to public directory
 func Publish(c *gin.Context) {
-	token := c.PostForm("token")
-
-	if _, exist := usersLoginInfo[token]; !exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-		return
-	}
+	title := c.PostForm("title")
+	userId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	log.Printf("获取到用户id:%v\n", userId)
 
 	data, err := c.FormFile("data")
+
 	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
@@ -33,21 +34,42 @@ func Publish(c *gin.Context) {
 		return
 	}
 
-	filename := filepath.Base(data.Filename)
-	user := usersLoginInfo[token]
-	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
-	saveFile := filepath.Join("./public/", finalName)
-	if err := c.SaveUploadedFile(data, saveFile); err != nil {
+	//生成视频地址
+	videoUUID, _ := uuid.NewV4()
+	videoDir := time.Now().Format("2006-01-02") + "/" + videoUUID.String() + ".mp4"
+	videoUrl := "https://" + "douyin-ljy" + ".oss-cn-beijing.aliyuncs.com/" + videoDir
+	fmt.Println("上传视频地址是" + videoUrl)
+	//生成图片地址
+	pictureUUID, _ := uuid.NewV4()
+	pictureDir := time.Now().Format("2006-01-02") + "/" + pictureUUID.String() + ".jpg"
+	coverUrl := "https://" + "douyin-ljy" + ".oss-cn-beijing.aliyuncs.com/" + pictureDir
+	fmt.Println("上传视频封面的地址是" + coverUrl)
+
+	//开启协程上传
+	go func() {
+		//上传视频
+		_ = utils.UploadVideo(videoDir, data)
+		//time.Sleep(2*time.Second)
+		//获取封面
+		coverBytes, _ := utils.ReadFrameAsJpeg(videoUrl)
+		//上传封面
+		_ = utils.UploadPicture(pictureDir, coverBytes)
+	}()
+
+	err2 := dao.Save(videoUrl, coverUrl, userId, title)
+	if err2 != nil {
+		log.Printf("方法videoService.Publish(data, userId) 失败：%v", err)
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
 		return
 	}
+	log.Printf("方法videoDao save 成功")
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: 0,
-		StatusMsg:  finalName + " uploaded successfully",
+		StatusMsg:  "uploaded successfully",
 	})
 }
 
@@ -63,7 +85,7 @@ func PublishList(c *gin.Context) {
 	var curId int64 = 2
 	log.Printf("获取到当前用户id:%v\n", curId)
 
-	videoService := service.VideoServiceImpl{}
+	videoService := GetVideo()
 	list, err := videoService.List(userId, curId)
 	if err != nil {
 		log.Printf("调用videoService.List(%v)出现错误：%v\n", userId, err)

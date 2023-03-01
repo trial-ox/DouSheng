@@ -69,20 +69,20 @@ func GetVideosByAuthorId(authorId int64) ([]TableVideo, error) {
 // 	return nil
 // }
 
-// // Save 保存视频记录
-// func Save(videoName string, imageName string, authorId int64, title string) error {
-// 	var video TableVideo
-// 	video.PublishTime = time.Now()
-// 	video.PlayUrl = config.PlayUrlPrefix + videoName + ".mp4"
-// 	video.CoverUrl = config.CoverUrlPrefix + imageName + ".jpg"
-// 	video.AuthorId = authorId
-// 	video.Title = title
-// 	result := Db.Save(&video)
-// 	if result.Error != nil {
-// 		return result.Error
-// 	}
-// 	return nil
-// }
+// Save 保存视频记录
+func Save(videoName string, imageName string, authorId int64, title string) error {
+	var video TableVideo
+	video.PublishTime = time.Now()
+	video.PlayUrl = videoName
+	video.CoverUrl = imageName
+	video.AuthorId = authorId
+	video.Title = title
+	result := Db.Save(&video)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
 
 // GetVideoByVideoId
 // 依据VideoId来获得视频信息

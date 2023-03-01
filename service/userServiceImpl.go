@@ -118,22 +118,22 @@ func (usi *UserServiceImpl) GetUserById(id int64) (User, error) {
 		return user, err
 	}
 	log.Println("Query User Success")
-	//followCount, _ := usi.GetFollowingCnt(id)
-	//if err != nil {
-	//	log.Println("Err:", err.Error())
-	//}
-	//followerCount, _ := usi.GetFollowerCnt(id)
-	//if err != nil {
-	//	log.Println("Err:", err.Error())
-	//}
+	followCount, _ := usi.GetFollowingCnt(id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+	}
+	followerCount, _ := usi.GetFollowerCnt(id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+	}
 	u := GetLikeService() //解决循环依赖
 	totalFavorited, _ := u.TotalFavourite(id)
 	favoritedCount, _ := u.FavouriteVideoCount(id)
 	user = User{
 		Id:             id,
 		Name:           tableUser.Name,
-		FollowCount:    0,
-		FollowerCount:  0,
+		FollowCount:    followCount,
+		FollowerCount:  followerCount,
 		IsFollow:       false,
 		TotalFavorited: totalFavorited,
 		FavoriteCount:  favoritedCount,
@@ -160,27 +160,27 @@ func (usi *UserServiceImpl) GetUserByIdWithCurId(id int64, curId int64) (User, e
 	}
 	log.Println("Query User Success")
 
-	//followCount, err := usi.GetFollowingCnt(id)
-	//if err != nil {
-	//	log.Println("Err:", err.Error())
-	//}
-	//followerCount, err := usi.GetFollowerCnt(id)
-	//if err != nil {
-	//	log.Println("Err:", err.Error())
-	//}
-	//isfollow, err := usi.IsFollowing(curId, id)
-	//if err != nil {
-	//	log.Println("Err:", err.Error())
-	//}
+	followCount, err := usi.GetFollowingCnt(id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+	}
+	followerCount, err := usi.GetFollowerCnt(id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+	}
+	isfollow, err := usi.IsFollowing(curId, id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+	}
 	u := GetLikeService() //解决循环依赖
 	totalFavorited, _ := u.TotalFavourite(id)
 	favoritedCount, _ := u.FavouriteVideoCount(id)
 	user = User{
-		Id:   id,
-		Name: tableUser.Name,
-		//FollowCount:   followCount,
-		//FollowerCount: followerCount,
-		//IsFollow:      isfollow,
+		Id:             id,
+		Name:           tableUser.Name,
+		FollowCount:    followCount,
+		FollowerCount:  followerCount,
+		IsFollow:       isfollow,
 		TotalFavorited: totalFavorited,
 		FavoriteCount:  favoritedCount,
 	}

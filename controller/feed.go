@@ -53,7 +53,6 @@ func Feed(c *gin.Context) {
 func GetVideo() service.VideoServiceImpl {
 	var userService service.UserServiceImpl
 	var videoService service.VideoServiceImpl
-	videoService.UserService = &userService
 	var followService service.FollowServiceImp
 	var favoriteService service.FavoriteServiceImpl
 	var commentService service.CommentServiceImpl
@@ -64,5 +63,6 @@ func GetVideo() service.VideoServiceImpl {
 	commentService.UserService = &userService
 	videoService.CommentService = &commentService
 	videoService.FavoriteService = &favoriteService
+	videoService.UserService = &userService
 	return videoService
 }
